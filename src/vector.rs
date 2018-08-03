@@ -27,8 +27,6 @@ impl Vector {
      }
 }
 
-
-
 impl Add for Vector{
     type Output = Vector;
 
@@ -45,27 +43,57 @@ impl Sub for Vector{
     }
 }
 
-impl Mul for Vector{
+impl Mul<f64> for Vector{
     type Output = Vector;
 
-    fn mul(self, other: Vector) -> Vector{
-        Vector{x: self.x*other.x, y: self.y*other.y, z: self.z*other.z}
+    fn mul(self, other: f64) -> Vector{
+        println!("Vector method");
+        Vector{x: self.x*other, y: self.y*other, z: self.z*other}
     }
 }
 
-impl Div for Vector{
+impl Div<f64> for Vector{
     type Output = Vector;
 
-    fn div(self, other: Vector) -> Vector{
-        if other.x == 0.0 || other.y == 0.0 || other.z == 0.0{
+    fn div(self, other: f64) -> Vector{
+        if other == 0.0{
             panic!("Cannot divide by zero.");
         }
-        Vector{x: self.x/other.x, y: self.y/other.y, z: self.z/other.z}
+        Vector{x: self.x/other, y: self.y/other, z: self.z/other}
     }
 }
 
 impl fmt::Display for Vector{
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result{
         write!(f, "({}, {}, {})",self.x, self.y, self.z)
+    }
+}
+
+impl Mul<Vector> for f64{
+    type Output = Vector;
+
+    fn mul(self, b: Vector) -> Vector{
+        println!("f64 method");
+        b * self
+    }
+}
+
+fn normalize(v : Vector) -> Vector{
+    v * (1.0 / v.length())
+}
+
+fn multiply(v1: Vector, v2: Vector) -> Vector{
+    Vector{x: v1.x * v2.x, y: v1.y * v2.y, z: v1.z*v2.z}
+}
+
+fn dot(v1: Vector, v2: Vector) -> f64{
+    v1.x * v2.x + v1.y * v2.y + v1.z * v2.z
+}
+
+fn cross(v1: Vector, v2: Vector) -> Vector{
+    Vector{
+        x: (v1.y * v2.z) - (v1.z * v2.y),
+        y: (v1.x * v2.z) - (v1.z * v2.x),
+        z: (v1.x * v2.y) - (v1.y * v2.x)
     }
 }
