@@ -7,3 +7,4 @@ pub mod random;
 pub mod material;
 pub mod ppm;
 pub mod ray;
+pub mod sphere;

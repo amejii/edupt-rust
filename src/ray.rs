@@ -1,8 +1,8 @@
 use vector::Vector;
 
-struct Ray{
-    org : Vector,
-    dir : Vector,
+pub struct Ray{
+    pub org : Vector,
+    pub dir : Vector,
 }
 
 impl Ray {

@@ -2,7 +2,8 @@ use vector::Vector;
 
 pub type Color = Vector;
 
-enum ReflectionType{
+#[derive(Debug)]
+pub enum ReflectionType{
     REFLECTION_TYPE_DIFFUSE,        
     REFLECTION_TYPE_SPECULAR,
     REFLECTION_TYPE_REFRACTION,

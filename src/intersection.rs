@@ -2,10 +2,10 @@ use vector::Vector;
 use constant::K_INF;
 
 #[derive(Debug)]
-struct Hitpoint {
-    distance: f64,
-    normal: Vector,
-    position: Vector,
+pub struct Hitpoint {
+    pub distance: f64,
+    pub normal: Vector,
+    pub position: Vector,
 }
 
 impl Hitpoint{
