@@ -7,12 +7,12 @@ use intersection::Hitpoint;
 use vecmath::traits::Sqrt;
 
 #[derive(Debug)]
-struct Sphere {
-    radius: f64,
-    position: Vector,
-    emission: Color,
-    color: Color,
-    reflection_type: ReflectionType,
+pub struct Sphere {
+    pub radius: f64,
+    pub position: Vector,
+    pub emission: Color,
+    pub color: Color,
+    pub reflection_type: ReflectionType,
 }
 
 impl Sphere{
@@ -26,7 +26,7 @@ impl Sphere{
         }
     }
 
-    fn intersect(self, ray: &Ray, mut hitpoint: Hitpoint) -> bool{
+    pub fn intersect(&self, ray: &Ray, mut hitpoint: &mut Hitpoint) -> bool{
         let mut p_o = self.position - ray.org;
         let mut b = vector::dot(p_o, ray.dir);
         let mut D4 = b * b - vector::dot(p_o, p_o) + self.radius * self.radius;

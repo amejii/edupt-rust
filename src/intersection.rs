@@ -9,7 +9,7 @@ pub struct Hitpoint {
 }
 
 impl Hitpoint{
-    fn new () -> Hitpoint{
+    pub fn new () -> Hitpoint{
         Hitpoint{
             distance : K_INF,
             normal : Vector{x:0.0, y:0.0, z:0.0},
@@ -19,9 +19,9 @@ impl Hitpoint{
 }
 
 #[derive(Debug)]
-struct Intersection {
-    hitpoint: Hitpoint,
-    object_id : i32,   
+pub struct Intersection {
+    pub hitpoint: Hitpoint,
+    pub object_id : i32,   
 }
 
 impl Intersection {
