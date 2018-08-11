@@ -7,7 +7,7 @@ use ray::Ray;
 use material::{Color,ReflectionType};
 use vecmath::traits::Sqrt;
 
-const spheres : [Sphere;10]= [
+pub const spheres : [Sphere;10]= [
     Sphere{radius:1e5, position:Vector{x:1e5+1.0, y:40.8, z:81.6}, emission:Color{x:0.0,y:0.0,z:0.0},  color:Color{x:0.75, y:0.25, z:0.25}, reflection_type:ReflectionType::REFLECTION_TYPE_DIFFUSE},// left
 	Sphere{radius:1e5, position:Vector{x:-1e5+99.0, y:40.8, z:81.6},emission:Color{x:0.0,y:0.0,z:0.0},  color:Color{x:0.25, y:0.25, z:0.75}, reflection_type:ReflectionType::REFLECTION_TYPE_DIFFUSE}, // right
 	Sphere{radius:1e5, position:Vector{x:50.0, y:40.8, z:1e5},      emission:Color{x:0.0,y:0.0,z:0.0},  color:Color{x:0.75, y:0.75, z:0.75}, reflection_type:ReflectionType::REFLECTION_TYPE_DIFFUSE}, // back
@@ -20,7 +20,7 @@ const spheres : [Sphere;10]= [
 	Sphere{radius:15.0,position:Vector{x:50.0, y:90.0, z:81.6},   emission:Color{x:36.0,y:36.0,z:36.0},     color:Color{x:0.0,y:0.0,z:0.0},      reflection_type:ReflectionType::REFLECTION_TYPE_DIFFUSE}, //illumination
 ];
 
-fn intersect_scene(ray: &Ray, mut intersection: Intersection) -> bool{
+pub fn intersect_scene(ray: &Ray, mut intersection: &mut Intersection) -> bool{
     let n = spheres.len();
 
     intersection.hitpoint.distance = K_INF;

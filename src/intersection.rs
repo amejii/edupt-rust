@@ -25,7 +25,7 @@ pub struct Intersection {
 }
 
 impl Intersection {
-     fn new () -> Intersection{
+     pub fn new () -> Intersection{
          Intersection{
              object_id : -1,
              hitpoint : Hitpoint::new(),
