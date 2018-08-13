@@ -36,6 +36,7 @@ impl Sphere{
         }
 
         let sqrt_D4 = Sqrt::sqrt(D4);
+        //original edupt write following lines in one line, but that is not allow in rust...
         let t1 = b - sqrt_D4;
         let t2 = b + sqrt_D4;
 

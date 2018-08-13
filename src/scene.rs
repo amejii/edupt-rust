@@ -1,3 +1,5 @@
+//many things are use here.
+//organize later...
 use constant::K_INF;
 use sphere::Sphere;
 use intersection::{Hitpoint,Intersection};

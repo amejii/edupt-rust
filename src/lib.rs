@@ -1,5 +1,7 @@
 extern crate vecmath;
 
+//original edupt use "namespace" keyword.
+//this is a list of modules in the edupt namespace. (imitation of namespace)
 pub mod vector;
 pub mod constant;
 pub mod intersection;

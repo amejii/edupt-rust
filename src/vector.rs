@@ -30,6 +30,7 @@ impl Vector {
      }
 }
 
+//Add, Sub, Mul, Div are operator implementation for Vector class
 impl Add for Vector{
     type Output = Vector;
 

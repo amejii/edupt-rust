@@ -1,3 +1,5 @@
+//many things are use here.
+//organize later...
 use constant::{K_INF,K_EPS,K_PI};
 use sphere::Sphere;
 use intersection::{Hitpoint,Intersection};
@@ -15,24 +17,24 @@ const K_DEPTH : i32 = 5;
 const K_DEPTH_LIMIT : i32 = 64;
 
 pub fn radiance(ray: Ray, mut rnd: &mut Random, depth: i32) -> Color{
-    //println!("argument rand = {}",rnd);
     let mut intersection = Intersection::new();
     if(!intersect_scene(&ray, &mut intersection)){
         return K_BACKGROUND_COLOR;
     }
 
-    let now_object : &Sphere = &spheres[intersection.object_id as usize];
+    
+    let now_object : &Sphere = &spheres[intersection.object_id as usize]; //array's index number need to be usize type
     let hitpoint : Hitpoint = intersection.hitpoint;
+    //can't write as xxx ? true : false, instead if statement work as expression in rust (therefore it return a value)
     let orienting_normal : Vector = if (vector::dot(hitpoint.normal, ray.dir) < 0.0){
-        hitpoint.normal
+        hitpoint.normal 
     }else{
         (-1.0 * hitpoint.normal)
     };
     let mut russian_roulette_probability = now_object.color.x.max(now_object.color.y.max(now_object.color.z));
-    //println!("after calc roulette rand = {}",rnd);
+    
     if(depth > K_DEPTH_LIMIT){
         russian_roulette_probability *= (0.5_f64).powf((depth-K_DEPTH_LIMIT).into());
-        //println!("russian_roulette is {}",russian_roulette_probability);
     }
 
     if (depth > K_DEPTH){
@@ -42,9 +44,12 @@ pub fn radiance(ray: Ray, mut rnd: &mut Random, depth: i32) -> Color{
     }else{
         russian_roulette_probability = 1.0;
     }
-    //println!("after check rand = {}",rnd);
+    
     let incoming_radiance : Color;
     let mut weight : Color = Color{x:1.0, y:1.0, z:1.0};
+    //this match doesn't need to loop.
+    //But it include break point in match block and, break is only work for loop block.
+    //So cover match block with loop block.
     loop{match(now_object.reflection_type){
         ReflectionType::REFLECTION_TYPE_DIFFUSE =>{
             let w : Vector = orienting_normal; 
@@ -56,11 +61,12 @@ pub fn radiance(ray: Ray, mut rnd: &mut Random, depth: i32) -> Color{
             }
             v = vector::cross(w, u);
 
-            //const だと通らない -can't capture dynamic environment in fn() item, use clouser instead-
+            //if define with const, it sayw error (-can't capture dynamic environment in fn() item, use clouser instead-)
+            //clouser??? sorry, ignore for now. may be TBD.
             let r1 : f64 = 2.0 * K_PI * rnd.next01();
             let r2 : f64 = rnd.next01();
             let r2s : f64 = r2.sqrt();
-            //println!("after define r1,2,2s rand = {}",rnd);
+            
             let dir = vector::normalize(u * r1.cos() * r2s + v * r1.sin() * r2s + w * (1.0-r2).sqrt());
 
             incoming_radiance = radiance(Ray{org:hitpoint.position,dir:dir}, rnd, depth+1);
@@ -110,6 +116,8 @@ pub fn radiance(ray: Ray, mut rnd: &mut Random, depth: i32) -> Color{
                     weight = now_object.color / ((1.0 - probability) * russian_roulette_probability);
                 }
             }else{
+                //this statement says error, that reflection_ray and rnd moved with first radiance() call.
+                //So the second radiance() call is not valid. To avoid this implement Copy trait for these structs.
                 incoming_radiance = radiance(reflection_ray, rnd, depth+1) * Re + radiance(reflection_ray, rnd, depth+1) * Tr;
                 weight = now_object.color / (russian_roulette_probability);
             }

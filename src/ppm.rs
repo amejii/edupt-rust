@@ -4,6 +4,9 @@ use std::io::prelude::*;
 use std::error::Error;
 use std::path::Path;
 
+
+//many simple methods are define with "inline" key word in original edupt.
+//But for now... never mind it in edupt-rust :p
 fn clamp(x:f64) -> f64{
     if x < 0.0{
         return 0.0;
@@ -22,6 +25,8 @@ fn to_int (x: f64) -> i32{
 }
 
 pub fn save_ppm_file(filename : &str, image : &[Color], width : i32, height : i32){
+    //originaly the following 3 lines are wrote in one line.
+    //If I tried to write it in one line without define "path", it says error. (TBD)
     let path = format!("{}{}","out/".to_string(),filename);
     let path = Path::new(&path);
 
@@ -39,6 +44,7 @@ pub fn save_ppm_file(filename : &str, image : &[Color], width : i32, height : i3
         Ok(_) => println!("successfully wrote to {}", path.display()),
     }
     
+    //use iterator instead of for(i=0;i<last;i++)
     for element in image.iter(){
         let data = format!("{} {} {} ",to_int(element.x),to_int(element.y),to_int(element.z));
         file.write_all(data.as_bytes());

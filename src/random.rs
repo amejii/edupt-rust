@@ -11,14 +11,16 @@ impl XorShift{
         self.seed_[0] = self.seed_[1];
         self.seed_[1] = self.seed_[2];
         self.seed_[2] = self.seed_[3];
+        //original edupt do calculation for seed[3] and return the calculated value in one line.
+        // ex) return seed_[3] = (seed_[3] ^ (seed_[3] >> 19)) ^ (t ^ (t >> 8)); 
+        //but I can't do same thing..
+        //If I write same thing, this function returns (), not u32
         self.seed_[3] = self.seed_[3] ^ (self.seed_[3] >> 19) ^ (t ^ (t >> 8));
         self.seed_[3]
     }
 
     pub fn next01(&mut self) -> f64{
-        let res = self.next() as f64 / u32::max_value() as f64;
-        //println!("rand::next01={}",res);
-        res
+        self.next() as f64 / u32::max_value() as f64;
     }
 
     pub fn new(initial_seed: u32) -> XorShift{

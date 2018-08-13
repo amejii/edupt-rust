@@ -1,3 +1,5 @@
+//many things are use here.
+//organize later...
 use radiance;
 use ppm;
 use random::Random;
@@ -20,8 +22,8 @@ pub fn render(width:u32, height:u32, samples:u32, supersamples:u32) -> i32{
     let screen_y = vector::normalize(vector::cross(screen_x, camera_dir)) * screen_height;
     let screen_center = camera_position + camera_dir * screen_dist;
 
-    //using vector instead of array, because array need to now size at compile time, 
-    //therefore it can't use variable as size number
+    //using vector instead of array, because array need to know size at compile time, 
+    //therefore it can't use variable as index number
     let mut image : Vec<Color> = vec![Color{x:0.0,y:0.0,z:0.0};(width*height) as usize];
     
     for y in 0..height {
