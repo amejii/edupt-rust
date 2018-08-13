@@ -1,5 +1,6 @@
 use std::fmt;
 
+#[derive(Debug, Copy, Clone)]
 pub struct XorShift{
    seed_: [u32; 4],
 }
@@ -10,12 +11,14 @@ impl XorShift{
         self.seed_[0] = self.seed_[1];
         self.seed_[1] = self.seed_[2];
         self.seed_[2] = self.seed_[3];
-        self.seed_[3] = self.seed_[3] ^ (self.seed_[3] >> 19) ^ (t ^ (t >> 18));
+        self.seed_[3] = self.seed_[3] ^ (self.seed_[3] >> 19) ^ (t ^ (t >> 8));
         self.seed_[3]
     }
 
     pub fn next01(&mut self) -> f64{
-        (self.next() / u32::max_value()) as f64
+        let res = self.next() as f64 / u32::max_value() as f64;
+        //println!("rand::next01={}",res);
+        res
     }
 
     pub fn new(initial_seed: u32) -> XorShift{

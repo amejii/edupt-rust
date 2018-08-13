@@ -1,5 +1,6 @@
 use vector::Vector;
 
+#[derive(Debug, Copy, Clone)]
 pub struct Ray{
     pub org : Vector,
     pub dir : Vector,

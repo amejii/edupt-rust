@@ -41,7 +41,6 @@ pub fn save_ppm_file(filename : &str, image : &[Color], width : i32, height : i3
     
     for element in image.iter(){
         let data = format!("{} {} {} ",to_int(element.x),to_int(element.y),to_int(element.z));
-        println!("{}", data);
         file.write_all(data.as_bytes());
     }
 }

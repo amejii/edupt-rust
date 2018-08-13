@@ -10,3 +10,4 @@ pub mod ray;
 pub mod sphere;
 pub mod scene;
 pub mod radiance;
+pub mod render;

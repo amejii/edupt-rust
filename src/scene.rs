@@ -26,7 +26,7 @@ pub fn intersect_scene(ray: &Ray, mut intersection: &mut Intersection) -> bool{
     intersection.hitpoint.distance = K_INF;
     intersection.object_id = -1;
 
-    for i in 0..=n-1 {
+    for i in 0..n {
         let mut hitpoint : Hitpoint = Hitpoint::new();
         if (spheres[i].intersect(ray, &mut hitpoint)){
             if(hitpoint.distance < intersection.hitpoint.distance){

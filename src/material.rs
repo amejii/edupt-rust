@@ -9,4 +9,4 @@ pub enum ReflectionType{
     REFLECTION_TYPE_REFRACTION,
 }
 
-const K_IOR : f64 = 1.5;
+pub const K_IOR : f64 = 1.5;

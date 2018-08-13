@@ -4,7 +4,7 @@ use intersection::{Hitpoint,Intersection};
 use vector;
 use vector::Vector;
 use ray::Ray;
-use material::{Color,ReflectionType};
+use material::{Color,ReflectionType,K_IOR};
 use vecmath::traits::Sqrt;
 use random::Random;
 use scene::{intersect_scene,spheres};
@@ -14,9 +14,9 @@ const K_BACKGROUND_COLOR : Color = Color{x:0.0,y:0.0,z:0.0};
 const K_DEPTH : i32 = 5;
 const K_DEPTH_LIMIT : i32 = 64;
 
-fn radiance(ray: Ray, mut rnd: Random, depth: i32) -> Color{
+pub fn radiance(ray: Ray, mut rnd: &mut Random, depth: i32) -> Color{
+    //println!("argument rand = {}",rnd);
     let mut intersection = Intersection::new();
-    
     if(!intersect_scene(&ray, &mut intersection)){
         return K_BACKGROUND_COLOR;
     }
@@ -28,8 +28,12 @@ fn radiance(ray: Ray, mut rnd: Random, depth: i32) -> Color{
     }else{
         (-1.0 * hitpoint.normal)
     };
-
     let mut russian_roulette_probability = now_object.color.x.max(now_object.color.y.max(now_object.color.z));
+    //println!("after calc roulette rand = {}",rnd);
+    if(depth > K_DEPTH_LIMIT){
+        russian_roulette_probability *= (0.5_f64).powf((depth-K_DEPTH_LIMIT).into());
+        //println!("russian_roulette is {}",russian_roulette_probability);
+    }
 
     if (depth > K_DEPTH){
         if(rnd.next01() >= russian_roulette_probability){
@@ -38,11 +42,10 @@ fn radiance(ray: Ray, mut rnd: Random, depth: i32) -> Color{
     }else{
         russian_roulette_probability = 1.0;
     }
-
+    //println!("after check rand = {}",rnd);
     let incoming_radiance : Color;
     let mut weight : Color = Color{x:1.0, y:1.0, z:1.0};
-
-    match(now_object.reflection_type){
+    loop{match(now_object.reflection_type){
         ReflectionType::REFLECTION_TYPE_DIFFUSE =>{
             let w : Vector = orienting_normal; 
             let mut u : Vector; let mut v : Vector;
@@ -57,20 +60,61 @@ fn radiance(ray: Ray, mut rnd: Random, depth: i32) -> Color{
             let r1 : f64 = 2.0 * K_PI * rnd.next01();
             let r2 : f64 = rnd.next01();
             let r2s : f64 = r2.sqrt();
-
+            //println!("after define r1,2,2s rand = {}",rnd);
             let dir = vector::normalize(u * r1.cos() * r2s + v * r1.sin() * r2s + w * (1.0-r2).sqrt());
 
             incoming_radiance = radiance(Ray{org:hitpoint.position,dir:dir}, rnd, depth+1);
             weight = now_object.color / russian_roulette_probability;
         }
         ReflectionType::REFLECTION_TYPE_SPECULAR =>{
-            incoming_radiance = radiance(Ray{org:hitpoint.position,dir:ray.dir - hitpoint.normal * 2.0 * vector::dot(hitpoint.normal, ray.dir)}, rnd, depth);
+            incoming_radiance = radiance(Ray{org:hitpoint.position,dir:ray.dir - hitpoint.normal * 2.0 * vector::dot(hitpoint.normal, ray.dir)}, rnd, depth+1);
             weight = now_object.color / russian_roulette_probability;
         }
         ReflectionType::REFLECTION_TYPE_REFRACTION => { 
-            incoming_radiance = Color{x:0.0,y:0.0,z:0.0};
+            let reflection_ray = Ray{org:hitpoint.position,dir:ray.dir - hitpoint.normal * 2.0 * vector::dot(hitpoint.normal, ray.dir)};
+            let into : bool = vector::dot(hitpoint.normal, orienting_normal) > 0.0;
+
+            let nc = 1.0;
+            let nt = K_IOR;
+            let nnt = if (into) {nc / nt} else {nt / nc};
+            let ddn = vector::dot(ray.dir, orienting_normal);
+            let cos2t = 1.0 - nnt * nnt * (1.0 - ddn * ddn);
+
+            if (cos2t < 0.0){
+                incoming_radiance = radiance(reflection_ray, rnd, depth+1);
+                weight = now_object.color / russian_roulette_probability;
+                break;  //break early
+            } 
+
+            let reflection_ray = Ray{org:hitpoint.position, 
+                dir: vector::normalize(ray.dir * nnt - hitpoint.normal * if(into){1.0}else{-1.0} * (ddn * nnt + cos2t.sqrt()))};
+
+            let a = nt - nc;
+            let b = nt + nc;
+            let R0 = (a * a) / (b * b);
+
+            let c = 1.0 - if(into){-ddn}else{
+                vector::dot(reflection_ray.dir, -1.0 * orienting_normal)
+            };
+            let Re = R0 + (1.0 - R0) * c.powf(5.0);
+            let nnt2 = if(into){(nc/nt).powf(2.0)}else{(nt/nc).powf(2.0)};
+            let Tr = (1.0 - Re) * nnt2;
+
+            let probability = 0.25 + 0.5 * Re;
+            if(depth > 2){
+                if(rnd.next01() < probability){
+                    incoming_radiance = radiance(reflection_ray, rnd, depth+1) * Re;
+                    weight = now_object.color / (probability * russian_roulette_probability);
+                }else{
+                    incoming_radiance = radiance(reflection_ray, rnd, depth+1) * Tr;
+                    weight = now_object.color / ((1.0 - probability) * russian_roulette_probability);
+                }
+            }else{
+                incoming_radiance = radiance(reflection_ray, rnd, depth+1) * Re + radiance(reflection_ray, rnd, depth+1) * Tr;
+                weight = now_object.color / (russian_roulette_probability);
+            }
         }
-    }
+    } break; }// always break at the end of loop
 
     now_object.emission + vector::multiply(weight, incoming_radiance)
 }

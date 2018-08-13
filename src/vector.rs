@@ -13,7 +13,7 @@ pub struct Vector{
 }
 
 impl Vector {
-     fn new(x : f64, y : f64, z : f64) -> Vector{
+     pub fn new(x : f64, y : f64, z : f64) -> Vector{
          Vector{
              x : x,
              y : y,
@@ -50,7 +50,6 @@ impl Mul<f64> for Vector{
     type Output = Vector;
 
     fn mul(self, other: f64) -> Vector{
-        println!("Vector method");
         Vector{x: self.x*other, y: self.y*other, z: self.z*other}
     }
 }
@@ -76,7 +75,6 @@ impl Mul<Vector> for f64{
     type Output = Vector;
 
     fn mul(self, b: Vector) -> Vector{
-        println!("f64 method");
         b * self
     }
 }
@@ -96,7 +94,7 @@ pub fn dot(v1: Vector, v2: Vector) -> f64{
 pub fn cross(v1: Vector, v2: Vector) -> Vector{
     Vector{
         x: (v1.y * v2.z) - (v1.z * v2.y),
-        y: (v1.x * v2.z) - (v1.z * v2.x),
+        y: (v1.z * v2.x) - (v1.x * v2.z),
         z: (v1.x * v2.y) - (v1.y * v2.x)
     }
 }
