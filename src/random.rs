@@ -20,7 +20,7 @@ impl XorShift{
     }
 
     pub fn next01(&mut self) -> f64{
-        self.next() as f64 / u32::max_value() as f64;
+        self.next() as f64 / u32::max_value() as f64
     }
 
     pub fn new(initial_seed: u32) -> XorShift{
