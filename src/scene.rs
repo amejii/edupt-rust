@@ -1,10 +1,8 @@
 //many things are use here.
 //organize later...
-use constant::K_INF;
-use sphere::Sphere;
-use intersection::{Hitpoint,Intersection};
-use vector;
-use vector::Vector;
+pub use sphere::Sphere;
+pub use intersection::{Hitpoint,Intersection,K_INF};
+pub use vector::Vector;
 use ray::Ray;
 use material::{Color,ReflectionType};
 use vecmath::traits::Sqrt;

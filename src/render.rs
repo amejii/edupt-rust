@@ -1,25 +1,20 @@
 //many things are use here.
 //organize later...
-use radiance;
-use ppm;
-use random::Random;
-use vector::Vector;
-use vector;
-use material::Color;
-use ray::Ray;
+use radiance::{radiance,Ray,Random,Vector,normalize,cross};
+use ppm::{Color,save_ppm_file};
 
 
 pub fn render(width:u32, height:u32, samples:u32, supersamples:u32) -> i32{
     let camera_position = Vector{x:50.0,y:52.0,z:220.0};
-    let camera_dir      = vector::normalize(Vector{x:0.0,y:-0.04,z:-1.0});
+    let camera_dir      = normalize(Vector{x:0.0,y:-0.04,z:-1.0});
     let camera_up       = Vector{x:0.0,y:1.0,z:0.0};
 
     let screen_width  = 30.0 * width as f64 / height as f64;
     let screen_height = 30.0;
 
     let screen_dist   = 40.0;
-    let screen_x = vector::normalize(vector::cross(camera_dir, camera_up)) * screen_width;
-    let screen_y = vector::normalize(vector::cross(screen_x, camera_dir)) * screen_height;
+    let screen_x = normalize(cross(camera_dir, camera_up)) * screen_width;
+    let screen_y = normalize(cross(screen_x, camera_dir)) * screen_height;
     let screen_center = camera_position + camera_dir * screen_dist;
 
     //using vector instead of array, because array need to know size at compile time, 
@@ -44,9 +39,9 @@ pub fn render(width:u32, height:u32, samples:u32, supersamples:u32) -> i32{
                             ((r1 + x as f64) / width as f64 - 0.5) + 
                             screen_y * ((r2 + y as f64) / height as f64 - 0.5);
 
-                        let dir = vector::normalize(screen_position - camera_position);
+                        let dir = normalize(screen_position - camera_position);
                         accumulated_radiance = accumulated_radiance +
-                            radiance::radiance(Ray{org:camera_position,dir:dir}, &mut rnd, 0) / samples as f64 / (supersamples * supersamples) as f64;
+                            radiance(Ray{org:camera_position,dir:dir}, &mut rnd, 0) / samples as f64 / (supersamples * supersamples) as f64;
                     }
                     image[image_index as usize] = image[image_index as usize] + accumulated_radiance;
                 }
@@ -54,6 +49,6 @@ pub fn render(width:u32, height:u32, samples:u32, supersamples:u32) -> i32{
         }
     }
 
-    ppm::save_ppm_file("image.ppm", &image, width as i32, height as i32);
+    save_ppm_file("image.ppm", &image, width as i32, height as i32);
     0
 }

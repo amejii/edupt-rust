@@ -1,5 +1,5 @@
 use vector::Vector;
-use constant::K_INF;
+pub use constant::K_INF;
 
 #[derive(Debug)]
 pub struct Hitpoint {

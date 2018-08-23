@@ -1,15 +1,11 @@
 //many things are use here.
 //organize later...
-use constant::{K_INF,K_EPS,K_PI};
-use sphere::Sphere;
-use intersection::{Hitpoint,Intersection};
-use vector;
-use vector::Vector;
-use ray::Ray;
+use constant::{K_EPS,K_PI};
+pub use vector::{Vector,dot,normalize,cross,multiply};
+pub use ray::Ray;
 use material::{Color,ReflectionType,K_IOR};
-use vecmath::traits::Sqrt;
-use random::Random;
-use scene::{intersect_scene,spheres};
+pub use random::Random;
+use scene::{intersect_scene,spheres,Hitpoint,Intersection,Sphere};
 use std;
 
 const K_BACKGROUND_COLOR : Color = Color{x:0.0,y:0.0,z:0.0};
@@ -26,7 +22,7 @@ pub fn radiance(ray: Ray, mut rnd: &mut Random, depth: i32) -> Color{
     let now_object : &Sphere = &spheres[intersection.object_id as usize]; //array's index number need to be usize type
     let hitpoint : Hitpoint = intersection.hitpoint;
     //can't write as xxx ? true : false, instead if statement work as expression in rust (therefore it return a value)
-    let orienting_normal : Vector = if (vector::dot(hitpoint.normal, ray.dir) < 0.0){
+    let orienting_normal : Vector = if (dot(hitpoint.normal, ray.dir) < 0.0){
         hitpoint.normal 
     }else{
         (-1.0 * hitpoint.normal)
@@ -55,11 +51,11 @@ pub fn radiance(ray: Ray, mut rnd: &mut Random, depth: i32) -> Color{
             let w : Vector = orienting_normal; 
             let mut u : Vector; let mut v : Vector;
             if (w.x > K_EPS){
-                u = vector::normalize(vector::cross(Vector{x:0.0,y:1.0,z:0.0}, w));
+                u = normalize(cross(Vector{x:0.0,y:1.0,z:0.0}, w));
             }else{
-                u = vector::normalize(vector::cross(Vector{x:1.0,y:0.0,z:0.0}, w));
+                u = normalize(cross(Vector{x:1.0,y:0.0,z:0.0}, w));
             }
-            v = vector::cross(w, u);
+            v = cross(w, u);
 
             //if define with const, it sayw error (-can't capture dynamic environment in fn() item, use clouser instead-)
             //clouser??? sorry, ignore for now. may be TBD.
@@ -67,23 +63,23 @@ pub fn radiance(ray: Ray, mut rnd: &mut Random, depth: i32) -> Color{
             let r2 : f64 = rnd.next01();
             let r2s : f64 = r2.sqrt();
             
-            let dir = vector::normalize(u * r1.cos() * r2s + v * r1.sin() * r2s + w * (1.0-r2).sqrt());
+            let dir = normalize(u * r1.cos() * r2s + v * r1.sin() * r2s + w * (1.0-r2).sqrt());
 
             incoming_radiance = radiance(Ray{org:hitpoint.position,dir:dir}, rnd, depth+1);
             weight = now_object.color / russian_roulette_probability;
         }
         ReflectionType::REFLECTION_TYPE_SPECULAR =>{
-            incoming_radiance = radiance(Ray{org:hitpoint.position,dir:ray.dir - hitpoint.normal * 2.0 * vector::dot(hitpoint.normal, ray.dir)}, rnd, depth+1);
+            incoming_radiance = radiance(Ray{org:hitpoint.position,dir:ray.dir - hitpoint.normal * 2.0 * dot(hitpoint.normal, ray.dir)}, rnd, depth+1);
             weight = now_object.color / russian_roulette_probability;
         }
         ReflectionType::REFLECTION_TYPE_REFRACTION => { 
-            let reflection_ray = Ray{org:hitpoint.position,dir:ray.dir - hitpoint.normal * 2.0 * vector::dot(hitpoint.normal, ray.dir)};
-            let into : bool = vector::dot(hitpoint.normal, orienting_normal) > 0.0;
+            let reflection_ray = Ray{org:hitpoint.position,dir:ray.dir - hitpoint.normal * 2.0 * dot(hitpoint.normal, ray.dir)};
+            let into : bool = dot(hitpoint.normal, orienting_normal) > 0.0;
 
             let nc = 1.0;
             let nt = K_IOR;
             let nnt = if (into) {nc / nt} else {nt / nc};
-            let ddn = vector::dot(ray.dir, orienting_normal);
+            let ddn = dot(ray.dir, orienting_normal);
             let cos2t = 1.0 - nnt * nnt * (1.0 - ddn * ddn);
 
             if (cos2t < 0.0){
@@ -93,14 +89,14 @@ pub fn radiance(ray: Ray, mut rnd: &mut Random, depth: i32) -> Color{
             } 
 
             let reflection_ray = Ray{org:hitpoint.position, 
-                dir: vector::normalize(ray.dir * nnt - hitpoint.normal * if(into){1.0}else{-1.0} * (ddn * nnt + cos2t.sqrt()))};
+                dir: normalize(ray.dir * nnt - hitpoint.normal * if(into){1.0}else{-1.0} * (ddn * nnt + cos2t.sqrt()))};
 
             let a = nt - nc;
             let b = nt + nc;
             let R0 = (a * a) / (b * b);
 
             let c = 1.0 - if(into){-ddn}else{
-                vector::dot(reflection_ray.dir, -1.0 * orienting_normal)
+                dot(reflection_ray.dir, -1.0 * orienting_normal)
             };
             let Re = R0 + (1.0 - R0) * c.powf(5.0);
             let nnt2 = if(into){(nc/nt).powf(2.0)}else{(nt/nc).powf(2.0)};
@@ -124,5 +120,5 @@ pub fn radiance(ray: Ray, mut rnd: &mut Random, depth: i32) -> Color{
         }
     } break; }// always break at the end of loop
 
-    now_object.emission + vector::multiply(weight, incoming_radiance)
+    now_object.emission + multiply(weight, incoming_radiance)
 }

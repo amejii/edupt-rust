@@ -1,5 +1,4 @@
-use vector;
-use vector::Vector;
+pub use vector::{Vector,dot,normalize};
 use ray::Ray;
 use material::{Color,ReflectionType};
 use constant::K_EPS;
@@ -28,8 +27,8 @@ impl Sphere{
 
     pub fn intersect(&self, ray: &Ray, mut hitpoint: &mut Hitpoint) -> bool{
         let mut p_o = self.position - ray.org;
-        let mut b = vector::dot(p_o, ray.dir);
-        let mut D4 = b * b - vector::dot(p_o, p_o) + self.radius * self.radius;
+        let mut b = dot(p_o, ray.dir);
+        let mut D4 = b * b - dot(p_o, p_o) + self.radius * self.radius;
 
         if(D4 < 0.0){
             return false;
@@ -51,7 +50,7 @@ impl Sphere{
         }
 
         hitpoint.position = ray.org + hitpoint.distance * ray.dir;
-        hitpoint.normal = vector::normalize(hitpoint.position - self.position);
+        hitpoint.normal = normalize(hitpoint.position - self.position);
 
         true
     }

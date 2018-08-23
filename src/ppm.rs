@@ -1,4 +1,4 @@
-use material::Color;
+pub use material::Color;
 use std::fs::File;
 use std::io::prelude::*;
 use std::error::Error;
