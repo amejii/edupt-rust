@@ -25,12 +25,12 @@ impl Sphere{
         }
     }
 
-    pub fn intersect(&self, ray: &Ray, mut hitpoint: &mut Hitpoint) -> bool{
-        let mut p_o = self.position - ray.org;
-        let mut b = dot(p_o, ray.dir);
-        let mut D4 = b * b - dot(p_o, p_o) + self.radius * self.radius;
+    pub fn intersect(&self, ray: &Ray, hitpoint: &mut Hitpoint) -> bool{
+        let p_o = self.position - ray.org;
+        let b = dot(p_o, ray.dir);
+        let D4 = b * b - dot(p_o, p_o) + self.radius * self.radius;
 
-        if(D4 < 0.0){
+        if D4 < 0.0{
             return false;
         }
 
@@ -39,11 +39,11 @@ impl Sphere{
         let t1 = b - sqrt_D4;
         let t2 = b + sqrt_D4;
 
-        if(t1 < K_EPS && t2 < K_EPS){
+        if t1 < K_EPS && t2 < K_EPS {
             return false;
         }
 
-        if(t1 > K_EPS){
+        if t1 > K_EPS {
             hitpoint.distance = t1;
         }else{
             hitpoint.distance = t2;

@@ -5,7 +5,6 @@ pub use intersection::{Hitpoint,Intersection,K_INF};
 pub use vector::Vector;
 use ray::Ray;
 use material::{Color,ReflectionType};
-use vecmath::traits::Sqrt;
 
 pub const spheres : [Sphere;10]= [
     Sphere{radius:1e5, position:Vector{x:1e5+1.0, y:40.8, z:81.6}, emission:Color{x:0.0,y:0.0,z:0.0},  color:Color{x:0.75, y:0.25, z:0.25}, reflection_type:ReflectionType::REFLECTION_TYPE_DIFFUSE},// left
@@ -20,7 +19,7 @@ pub const spheres : [Sphere;10]= [
 	Sphere{radius:15.0,position:Vector{x:50.0, y:90.0, z:81.6},   emission:Color{x:36.0,y:36.0,z:36.0},     color:Color{x:0.0,y:0.0,z:0.0},      reflection_type:ReflectionType::REFLECTION_TYPE_DIFFUSE}, //illumination
 ];
 
-pub fn intersect_scene(ray: &Ray, mut intersection: &mut Intersection) -> bool{
+pub fn intersect_scene(ray: &Ray, intersection: &mut Intersection) -> bool{
     let n = spheres.len();
 
     intersection.hitpoint.distance = K_INF;
@@ -28,8 +27,8 @@ pub fn intersect_scene(ray: &Ray, mut intersection: &mut Intersection) -> bool{
 
     for i in 0..n {
         let mut hitpoint : Hitpoint = Hitpoint::new();
-        if (spheres[i].intersect(ray, &mut hitpoint)){
-            if(hitpoint.distance < intersection.hitpoint.distance){
+        if spheres[i].intersect(ray, &mut hitpoint) {
+            if hitpoint.distance < intersection.hitpoint.distance {
                 intersection.hitpoint = hitpoint;
                 intersection.object_id = i as i32;
             }

@@ -6,15 +6,14 @@ pub use ray::Ray;
 use material::{Color,ReflectionType,K_IOR};
 pub use random::Random;
 use scene::{intersect_scene,spheres,Hitpoint,Intersection,Sphere};
-use std;
 
 const K_BACKGROUND_COLOR : Color = Color{x:0.0,y:0.0,z:0.0};
 const K_DEPTH : i32 = 5;
 const K_DEPTH_LIMIT : i32 = 64;
 
-pub fn radiance(ray: Ray, mut rnd: &mut Random, depth: i32) -> Color{
+pub fn radiance(ray: Ray, rnd: &mut Random, depth: i32) -> Color{
     let mut intersection = Intersection::new();
-    if(!intersect_scene(&ray, &mut intersection)){
+    if !intersect_scene(&ray, &mut intersection){
         return K_BACKGROUND_COLOR;
     }
 
@@ -22,19 +21,19 @@ pub fn radiance(ray: Ray, mut rnd: &mut Random, depth: i32) -> Color{
     let now_object : &Sphere = &spheres[intersection.object_id as usize]; //array's index number need to be usize type
     let hitpoint : Hitpoint = intersection.hitpoint;
     //can't write as xxx ? true : false, instead if statement work as expression in rust (therefore it return a value)
-    let orienting_normal : Vector = if (dot(hitpoint.normal, ray.dir) < 0.0){
+    let orienting_normal : Vector = if dot(hitpoint.normal, ray.dir) < 0.0{
         hitpoint.normal 
     }else{
         (-1.0 * hitpoint.normal)
     };
     let mut russian_roulette_probability = now_object.color.x.max(now_object.color.y.max(now_object.color.z));
     
-    if(depth > K_DEPTH_LIMIT){
+    if depth > K_DEPTH_LIMIT{
         russian_roulette_probability *= (0.5_f64).powf((depth-K_DEPTH_LIMIT).into());
     }
 
-    if (depth > K_DEPTH){
-        if(rnd.next01() >= russian_roulette_probability){
+    if depth > K_DEPTH{
+        if rnd.next01() >= russian_roulette_probability{
             return now_object.emission;
         }
     }else{
@@ -46,11 +45,12 @@ pub fn radiance(ray: Ray, mut rnd: &mut Random, depth: i32) -> Color{
     //this match doesn't need to loop.
     //But it include break point in match block and, break is only work for loop block.
     //So cover match block with loop block.
-    loop{match(now_object.reflection_type){
+    loop{
+        match now_object.reflection_type {
         ReflectionType::REFLECTION_TYPE_DIFFUSE =>{
             let w : Vector = orienting_normal; 
             let mut u : Vector; let mut v : Vector;
-            if (w.x > K_EPS){
+            if w.x > K_EPS{
                 u = normalize(cross(Vector{x:0.0,y:1.0,z:0.0}, w));
             }else{
                 u = normalize(cross(Vector{x:1.0,y:0.0,z:0.0}, w));
@@ -78,33 +78,33 @@ pub fn radiance(ray: Ray, mut rnd: &mut Random, depth: i32) -> Color{
 
             let nc = 1.0;
             let nt = K_IOR;
-            let nnt = if (into) {nc / nt} else {nt / nc};
+            let nnt = if into {nc / nt} else {nt / nc};
             let ddn = dot(ray.dir, orienting_normal);
             let cos2t = 1.0 - nnt * nnt * (1.0 - ddn * ddn);
 
-            if (cos2t < 0.0){
+            if cos2t < 0.0{
                 incoming_radiance = radiance(reflection_ray, rnd, depth+1);
                 weight = now_object.color / russian_roulette_probability;
                 break;  //break early
             } 
 
             let reflection_ray = Ray{org:hitpoint.position, 
-                dir: normalize(ray.dir * nnt - hitpoint.normal * if(into){1.0}else{-1.0} * (ddn * nnt + cos2t.sqrt()))};
+                dir: normalize(ray.dir * nnt - hitpoint.normal * if into {1.0}else{-1.0} * (ddn * nnt + cos2t.sqrt()))};
 
             let a = nt - nc;
             let b = nt + nc;
             let R0 = (a * a) / (b * b);
 
-            let c = 1.0 - if(into){-ddn}else{
+            let c = 1.0 - if into {-ddn}else{
                 dot(reflection_ray.dir, -1.0 * orienting_normal)
             };
             let Re = R0 + (1.0 - R0) * c.powf(5.0);
-            let nnt2 = if(into){(nc/nt).powf(2.0)}else{(nt/nc).powf(2.0)};
+            let nnt2 = if into {(nc/nt).powf(2.0)}else{(nt/nc).powf(2.0)};
             let Tr = (1.0 - Re) * nnt2;
 
             let probability = 0.25 + 0.5 * Re;
-            if(depth > 2){
-                if(rnd.next01() < probability){
+            if depth > 2 {
+                if rnd.next01() < probability {
                     incoming_radiance = radiance(reflection_ray, rnd, depth+1) * Re;
                     weight = now_object.color / (probability * russian_roulette_probability);
                 }else{

@@ -29,7 +29,7 @@ pub fn render(width:u32, height:u32, samples:u32, supersamples:u32) -> i32{
             for sy in 0..supersamples{
                 for sx in 0..supersamples{
                     let mut accumulated_radiance = Color{x:0.0,y:0.0,z:0.0};
-                    for s in 0..samples{
+                    for _s in 0..samples{
                         let rate : f64 = 1.0 / supersamples as f64;
                         let r1 : f64 = sx as f64 * rate + rate / 2.0;
                         let r2 : f64 = sy as f64 * rate + rate / 2.0;
